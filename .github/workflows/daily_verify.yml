@@ -1,0 +1,45 @@
+name: Daily NBM/NDFD Verification
+
+# This tells GitHub WHEN to run the script
+on:
+  schedule:
+    # Runs at 14:00 UTC (10 AM EDT) every day. Adjust as needed.
+    - cron: '0 14 * * *'
+  workflow_dispatch: # This adds a button so you can run it manually anytime!
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest # Spins up a Linux machine
+
+    steps:
+      # 1. Grab the files from your repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Install weather and math libraries
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libeccodes0
+          python -m pip install --upgrade pip
+          pip install xarray cfgrib herbie-data matplotlib cartopy scipy
+
+      # 4. Run your python script
+      - name: Run verification script
+        run: python spatial_verification.py
+
+      # 5. Save the generated images back to your repository
+      - name: Commit and push generated maps
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add output_maps/*.png
+          # If no new maps were generated, don't fail, just exit
+          git commit -m "Auto-update daily verification maps" || exit 0
+          git push
