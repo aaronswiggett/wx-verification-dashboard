@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Verification Dashboard | NBM & NDFD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Placeholder styling for when images aren't generated yet */
+        .img-placeholder {
+            background: linear-gradient(110deg, #1e293b 8%, #334155 18%, #1e293b 33%);
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine {
+            to {
+                background-position-x: -200%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen font-sans">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-850 border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 text-blue-400">
+                        <i class="fa-solid fa-earth-americas text-2xl"></i>
+                    </div>
+                    <div class="ml-3 text-xl font-bold tracking-wide">
+                        NWP Verification
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#" class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium">Spatial Viewer</a>
+                        <a href="#" class="text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Point Analysis</a>
+                        <a href="#" class="text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Documentation</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Controls Header -->
+        <div class="bg-slate-800 rounded-xl p-4 shadow-lg mb-8 border border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex space-x-4 w-full sm:w-auto">
+                <div>
+                    <label class="block text-xs text-slate-400 uppercase tracking-wider mb-1">Parameter</label>
+                    <select class="bg-slate-900 border border-slate-600 rounded-md text-slate-200 py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                        <option>Maximum Temperature</option>
+                        <option>Minimum Temperature</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 uppercase tracking-wider mb-1">Valid Date</label>
+                    <input type="date" value="2026-05-22" class="bg-slate-900 border border-slate-600 rounded-md text-slate-200 py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                </div>
+            </div>
+            
+            <div class="text-sm text-slate-400 text-right">
+                <p>Verifying against <span class="font-semibold text-slate-200">URMA</span></p>
+                <p>Latest Run: <span id="last-updated">Updating...</span></p>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Truth (URMA) - Spans Full Width on large screens if desired, but here we'll keep it in the grid -->
+            <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 lg:col-span-2">
+                <div class="p-3 bg-slate-850 border-b border-slate-700 flex justify-between items-center">
+                    <h2 class="font-semibold text-lg text-emerald-400"><i class="fa-solid fa-check-circle mr-2"></i>Observed (URMA Analysis)</h2>
+                </div>
+                <div class="relative w-full aspect-[16/9] bg-slate-900 flex items-center justify-center overflow-hidden">
+                    <!-- Note: In production, src points to the output of your Python script -->
+                    <img src="./output_maps/urma_maxt.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" alt="URMA Map">
+                    <div class="absolute inset-0 img-placeholder flex flex-col items-center justify-center text-slate-500" style="display: none;">
+                        <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        <span class="text-sm">Waiting for Map Generation...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NBM Column -->
+            <div class="space-y-8">
+                <!-- Forecast -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700">
+                    <div class="p-3 bg-slate-850 border-b border-slate-700">
+                        <h2 class="font-semibold text-lg text-blue-400">NBM Forecast</h2>
+                    </div>
+                    <div class="relative w-full aspect-[16/9] bg-slate-900 flex items-center justify-center">
+                        <img src="./output_maps/nbm_maxt_forecast.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" alt="NBM Forecast">
+                        <div class="absolute inset-0 img-placeholder flex flex-col items-center justify-center text-slate-500" style="display: none;">
+                            <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delta/Error -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700">
+                    <div class="p-3 bg-slate-850 border-b border-slate-700">
+                        <h2 class="font-semibold text-lg text-rose-400">NBM Bias (Forecast - URMA)</h2>
+                    </div>
+                    <div class="relative w-full aspect-[16/9] bg-slate-900 flex items-center justify-center">
+                        <img src="./output_maps/nbm_maxt_delta.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" alt="NBM Delta">
+                        <div class="absolute inset-0 img-placeholder flex flex-col items-center justify-center text-slate-500" style="display: none;">
+                            <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NDFD Column -->
+            <div class="space-y-8">
+                <!-- Forecast -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700">
+                    <div class="p-3 bg-slate-850 border-b border-slate-700">
+                        <h2 class="font-semibold text-lg text-purple-400">NDFD Forecast</h2>
+                    </div>
+                    <div class="relative w-full aspect-[16/9] bg-slate-900 flex items-center justify-center">
+                        <img src="./output_maps/ndfd_maxt_forecast.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" alt="NDFD Forecast">
+                        <div class="absolute inset-0 img-placeholder flex flex-col items-center justify-center text-slate-500" style="display: none;">
+                            <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delta/Error -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700">
+                    <div class="p-3 bg-slate-850 border-b border-slate-700">
+                        <h2 class="font-semibold text-lg text-rose-400">NDFD Bias (Forecast - URMA)</h2>
+                    </div>
+                    <div class="relative w-full aspect-[16/9] bg-slate-900 flex items-center justify-center">
+                        <img src="./output_maps/ndfd_maxt_delta.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" alt="NDFD Delta">
+                        <div class="absolute inset-0 img-placeholder flex flex-col items-center justify-center text-slate-500" style="display: none;">
+                            <i class="fa-regular fa-image text-4xl mb-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Simple script to set the "Last Updated" text
+        document.getElementById('last-updated').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + " (Local)";
+    </script>
+</body>
+</html>
